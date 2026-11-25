@@ -1,4 +1,4 @@
-// Command llm-stream streams fake LLM tokens to a browser with go-sse.
+// Command llm-stream streams fake LLM tokens to a browser with go-ssekit.
 //
 //	go run ./examples/llm-stream
 //	open http://localhost:8080
@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/shani8615/go-sse"
+	"github.com/shani8615/go-ssekit"
 )
 
 const answer = "Server-Sent Events are a simple way to push data from a Go server to the browser " +
@@ -46,7 +46,7 @@ func main() {
 		_, _ = w.Write([]byte(page))
 	})
 	http.HandleFunc("GET /stream", func(w http.ResponseWriter, r *http.Request) {
-		s, err := sse.Upgrade(w, r, sse.StreamOptions{WriteTimeout: 10 * time.Second})
+		s, err := ssekit.Upgrade(w, r, ssekit.StreamOptions{WriteTimeout: 10 * time.Second})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -65,7 +65,7 @@ func main() {
 }
 
 const page = `<!doctype html>
-<html><head><meta charset="utf-8"><title>go-sse · LLM streaming demo</title>
+<html><head><meta charset="utf-8"><title>go-ssekit · LLM streaming demo</title>
 <style>
   body{margin:0;background:#181a21;color:#dcdfe4;font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;justify-content:center}
   main{width:min(720px,92vw);padding:40px 0}
@@ -79,7 +79,7 @@ const page = `<!doctype html>
   #meta{margin-top:10px;color:#828997;font:13px ui-monospace,Menlo,monospace}
 </style></head>
 <body><main>
-  <h1>go-sse · streaming tokens with EventSource</h1>
+  <h1>go-ssekit · streaming tokens with EventSource</h1>
   <form id="f"><input id="q" value="What are Server-Sent Events?"><button>Ask</button></form>
   <div id="out"></div>
   <div id="meta">event: — · tokens: 0</div>
