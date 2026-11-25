@@ -9,7 +9,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: Output of `go list -m github.com/shani8615/go-sse` (or the commit you're on)
+      description: Output of `go list -m github.com/shani8615/go-ssekit` (or the commit you're on)
       placeholder: v0.1.1
     validations:
       required: true
