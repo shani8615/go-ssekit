@@ -2,8 +2,16 @@
 
 [![ci](https://github.com/shani8615/go-sse/actions/workflows/ci.yml/badge.svg)](https://github.com/shani8615/go-sse/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/shani8615/go-sse.svg)](https://pkg.go.dev/github.com/shani8615/go-sse)
+[![Go Report Card](https://goreportcard.com/badge/github.com/shani8615/go-sse)](https://goreportcard.com/report/github.com/shani8615/go-sse)
+[![Release](https://img.shields.io/github/v/release/shani8615/go-sse?sort=semver)](https://github.com/shani8615/go-sse/releases)
+[![Go version](https://img.shields.io/github/go-mod/go-version/shani8615/go-sse)](go.mod)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Server-Sent Events for Go, done right.** Use it to stream LLM tokens, job progress, notifications and live dashboards over plain HTTP. Works with `net/http` and anything built on it, with no dependencies outside the standard library.
+
+![go-sse: LLM tokens streaming into a browser over Server-Sent Events](docs/demo.gif)
+
+<sub>Try it: `go run ./examples/llm-stream`, then open http://localhost:8080</sub>
 
 ```bash
 go get github.com/shani8615/go-sse
@@ -87,6 +95,23 @@ err := (&sse.Client{}).Do(req, func(e sse.Event) error {
 - **Proxies:** nginx buffers responses by default. The `X-Accel-Buffering: no` header turns buffering off per response. Keep-alive comments stop idle-timeout disconnects on load balancers.
 - **HTTP/1.1** allows only ~6 connections per domain in browsers, so serve SSE over HTTP/2 when you can.
 - **Server timeouts:** `http.Server.WriteTimeout` kills long streams. Leave it at 0 and use `StreamOptions.WriteTimeout` instead, which applies per write.
+
+## Why go-sse?
+
+There are good SSE libraries for Go already, including [tmaxmax/go-sse](https://github.com/tmaxmax/go-sse) (a separate project with the same name) and [r3labs/sse](https://github.com/r3labs/sse). This one focuses on a small API and on LLM streaming:
+
+| | this go-sse | tmaxmax/go-sse | r3labs/sse |
+|---|---|---|---|
+| Dependencies | standard library only | uses `cenkalti/backoff` | uses `cenkalti/backoff` |
+| Server writer + fan-out broker | ✓ | ✓ with pluggable providers | ✓ |
+| Replay for reconnecting clients | ✓ `Last-Event-ID` header or `?lastEventId=` | ✓ replayer interface | ✓ event log |
+| Slow subscribers dropped (not blocking others) | ✓ | — | — |
+| One-shot POST streams (LLM APIs) | ✓ `Client.Do` | ✓ `sse.Read` iterator | — |
+| Per-write timeouts for stalled clients | ✓ | — | — |
+
+<sub>— = not documented in that project's README/docs at the time of writing.</sub>
+
+**Pick this go-sse** for a compact, dependency-free building block. **Pick tmaxmax/go-sse** if you need its pluggable providers (e.g. backing the broker with an external pub/sub).
 
 ## License
 
