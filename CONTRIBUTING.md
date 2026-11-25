@@ -1,4 +1,4 @@
-# Contributing to go-sse
+# Contributing to go-ssekit
 
 Thanks for taking the time to help! Bug reports, docs fixes and pull requests are all welcome.
 
@@ -6,7 +6,7 @@ Thanks for taking the time to help! Bug reports, docs fixes and pull requests ar
 
 Open an issue using the **Bug report** template. A minimal program that reproduces the problem is the fastest way to a fix.
 
-Security problems go through [private vulnerability reporting](https://github.com/shani8615/go-sse/security/advisories/new), not public issues. See [SECURITY.md](SECURITY.md).
+Security problems go through [private vulnerability reporting](https://github.com/shani8615/go-ssekit/security/advisories/new), not public issues. See [SECURITY.md](SECURITY.md).
 
 ## Development
 

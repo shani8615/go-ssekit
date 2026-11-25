@@ -1,3 +1,3 @@
-module github.com/shani8615/go-sse
+module github.com/shani8615/go-ssekit
 
 go 1.24

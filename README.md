@@ -1,19 +1,21 @@
-# go-sse
+# go-ssekit
 
-[![ci](https://github.com/shani8615/go-sse/actions/workflows/ci.yml/badge.svg)](https://github.com/shani8615/go-sse/actions/workflows/ci.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/shani8615/go-sse.svg)](https://pkg.go.dev/github.com/shani8615/go-sse)
-[![Release](https://img.shields.io/github/v/release/shani8615/go-sse?sort=semver)](https://github.com/shani8615/go-sse/releases)
-[![Go version](https://img.shields.io/github/go-mod/go-version/shani8615/go-sse)](go.mod)
+[![ci](https://github.com/shani8615/go-ssekit/actions/workflows/ci.yml/badge.svg)](https://github.com/shani8615/go-ssekit/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/shani8615/go-ssekit.svg)](https://pkg.go.dev/github.com/shani8615/go-ssekit)
+[![Release](https://img.shields.io/github/v/release/shani8615/go-ssekit?sort=semver)](https://github.com/shani8615/go-ssekit/releases)
+[![Go version](https://img.shields.io/github/go-mod/go-version/shani8615/go-ssekit)](go.mod)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Server-Sent Events for Go, done right.** Use it to stream LLM tokens, job progress, notifications and live dashboards over plain HTTP. Works with `net/http` and anything built on it, with no dependencies outside the standard library.
 
-![go-sse: LLM tokens streaming into a browser over Server-Sent Events](docs/demo.gif)
+![go-ssekit: LLM tokens streaming into a browser over Server-Sent Events](docs/demo.gif)
 
 <sub>Try it: `go run ./examples/llm-stream`, then open http://localhost:8080</sub>
 
+> **Renamed:** this library was published as `github.com/shani8615/go-sse` until v0.1.1. From v0.2.0 it is `go-ssekit` (package `ssekit`), to avoid confusion with other Go projects named go-sse. To migrate, change the import path and replace `sse.` with `ssekit.`.
+
 ```bash
-go get github.com/shani8615/go-sse
+go get github.com/shani8615/go-ssekit
 ```
 
 | | |
@@ -27,7 +29,7 @@ go get github.com/shani8615/go-sse
 
 ```go
 http.HandleFunc("GET /chat", func(w http.ResponseWriter, r *http.Request) {
-    s, err := sse.Upgrade(w, r, sse.StreamOptions{WriteTimeout: 10 * time.Second})
+    s, err := ssekit.Upgrade(w, r, ssekit.StreamOptions{WriteTimeout: 10 * time.Second})
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
@@ -37,7 +39,7 @@ http.HandleFunc("GET /chat", func(w http.ResponseWriter, r *http.Request) {
             return
         }
     }
-    _ = s.Send(sse.Event{Event: "done", Data: "{}"})
+    _ = s.Send(ssekit.Event{Event: "done", Data: "{}"})
 })
 ```
 
@@ -50,10 +52,10 @@ es.addEventListener("done", () => es.close());
 ## Broadcast with resume
 
 ```go
-broker := sse.NewBroker(sse.BrokerOptions{Replay: 500})
+broker := ssekit.NewBroker(ssekit.BrokerOptions{Replay: 500})
 http.Handle("GET /events", broker) // handles Last-Event-ID, keep-alives, slow clients
 
-broker.Publish(sse.Event{Event: "order.updated", Data: `{"id":"o-1","status":"shipped"}`})
+broker.Publish(ssekit.Event{Event: "order.updated", Data: `{"id":"o-1","status":"shipped"}`})
 ```
 
 Event IDs are assigned automatically. When a browser reconnects, it sends `Last-Event-ID` and receives every event it missed that's still in the replay buffer.
@@ -61,24 +63,24 @@ Event IDs are assigned automatically. When a browser reconnects, it sends `Last-
 ## Consume a stream in Go
 
 ```go
-c := &sse.Client{Header: http.Header{"Authorization": {"Bearer " + token}}}
+c := &ssekit.Client{Header: http.Header{"Authorization": {"Bearer " + token}}}
 
-err := c.Subscribe(ctx, "https://api.example.com/events", func(e sse.Event) error {
+err := c.Subscribe(ctx, "https://api.example.com/events", func(e ssekit.Event) error {
     log.Printf("%s %s", e.Event, e.Data)
-    return nil // return sse.ErrStop to finish
+    return nil // return ssekit.ErrStop to finish
 })
 ```
 
-Reconnects follow the spec: the server's `retry` hint, backoff with jitter, and `Last-Event-ID`. A `204` stops reconnecting. A `4xx` returns `*sse.StatusError`.
+Reconnects follow the spec: the server's `retry` hint, backoff with jitter, and `Last-Event-ID`. A `204` stops reconnecting. A `4xx` returns `*ssekit.StatusError`.
 
 ### OpenAI-style streaming (POST)
 
 ```go
 req, _ := http.NewRequestWithContext(ctx, "POST", url+"/chat/completions", body)
 req.Header.Set("Authorization", "Bearer "+key)
-err := (&sse.Client{}).Do(req, func(e sse.Event) error {
+err := (&ssekit.Client{}).Do(req, func(e ssekit.Event) error {
     if e.Data == "[DONE]" {
-        return sse.ErrStop
+        return ssekit.ErrStop
     }
     var chunk Chunk
     if err := json.Unmarshal([]byte(e.Data), &chunk); err != nil {
@@ -95,11 +97,11 @@ err := (&sse.Client{}).Do(req, func(e sse.Event) error {
 - **HTTP/1.1** allows only ~6 connections per domain in browsers, so serve SSE over HTTP/2 when you can.
 - **Server timeouts:** `http.Server.WriteTimeout` kills long streams. Leave it at 0 and use `StreamOptions.WriteTimeout` instead, which applies per write.
 
-## Why go-sse?
+## Why go-ssekit?
 
-There are good SSE libraries for Go already, including [tmaxmax/go-sse](https://github.com/tmaxmax/go-sse) (a separate project with the same name) and [r3labs/sse](https://github.com/r3labs/sse). This one focuses on a small API and on LLM streaming:
+There are good SSE libraries for Go already, including [tmaxmax/go-sse](https://github.com/tmaxmax/go-sse) (a separate, more established project) and [r3labs/sse](https://github.com/r3labs/sse). This one focuses on a small API and on LLM streaming:
 
-| | this go-sse | tmaxmax/go-sse | r3labs/sse |
+| | go-ssekit | tmaxmax/go-sse | r3labs/sse |
 |---|---|---|---|
 | Dependencies | standard library only | uses `cenkalti/backoff` | uses `cenkalti/backoff` |
 | Server writer + fan-out broker | ✓ | ✓ with pluggable providers | ✓ |
@@ -110,7 +112,7 @@ There are good SSE libraries for Go already, including [tmaxmax/go-sse](https://
 
 <sub>— = not documented in that project's README/docs at the time of writing.</sub>
 
-**Pick this go-sse** for a compact, dependency-free building block. **Pick tmaxmax/go-sse** if you need its pluggable providers (e.g. backing the broker with an external pub/sub).
+**Pick go-ssekit** for a compact, dependency-free building block. **Pick tmaxmax/go-sse** if you need its pluggable providers (e.g. backing the broker with an external pub/sub).
 
 ## License
 

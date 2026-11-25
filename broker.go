@@ -1,4 +1,4 @@
-package sse
+package ssekit
 
 import (
 	"net/http"

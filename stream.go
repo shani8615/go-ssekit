@@ -1,8 +1,8 @@
-// Package sse implements Server-Sent Events for net/http: a server-side
+// Package ssekit implements Server-Sent Events for net/http: a server-side
 // Stream, a fan-out Broker with Last-Event-ID replay, a spec-compliant
 // Reader, and a reconnecting Client. It is well suited to streaming LLM
 // tokens, progress updates and live dashboards. No dependencies.
-package sse
+package ssekit
 
 import (
 	"bytes"
